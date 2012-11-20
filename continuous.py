@@ -4,6 +4,7 @@ from subprocess import call
 from os.path import abspath
 from argh import command, dispatch_command, arg
 import time
+import sys
 
 wrap_open = "_"
 wrap_close = "_"
@@ -34,18 +35,12 @@ class ContinuousHandler(FileSystemEventHandler):
             print event
             call(self.args)
 
-@arg ("--call-on-startup", default = True)
-@arg("command", nargs="+")
 def continuous(args):
-    call_on_startup = args.call_on_startup
-    args = args.command
     print "args: "
     print args
     observer = Observer()
     handler = ContinuousHandler (args)
     observer.schedule(handler, '.', recursive = True)
-    if call_on_startup:
-        call(handler.args)
     observer.start()
     try:
         while True:
@@ -55,8 +50,8 @@ def continuous(args):
     observer.join()
 
 def entry():
-    dispatch_command(continuous)
+    continuous(sys.argv[1:])
 
 
 if __name__ == '__main__':
-    dispatch_command(continuous)
+    dispatch_command(sys.argv[1:])
